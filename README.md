@@ -7,4 +7,5 @@ Final Project for gatechs cs7643 deep learning class. Facial detection and emoti
 pip install pytorch==1.10.2
 pip install pillow
 pip install opencv-python
+pip install scikit-learn
 ```
