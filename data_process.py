@@ -1,46 +1,59 @@
-from typing import List
-import cv2
-import numpy as np
 import os
+import numpy as np
+from PIL import Image
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
+from torch.utils.data import Dataset
+from torch import Tensor
 
-class DataProcess():
+class FaceDataset(Dataset):
 
-    GREYSCALE_DATA = 'data/greyscale_faces'
-    RGB_DATA = 'data/rgb_faces'
+    GREYSCALE_DATA = f'data{os.sep}greyscale_faces'
+    #RGB_DATA = f'data{os.sep}rgb_faces'
 
-    def __init__(self) -> None:
-        self.label_encoding = LabelEncoder()
+    def __init__(self,transform=None) -> None:
+        self.label_encoding = self._get_label_encodings()
+        self.data_count = self._get_count()
+        self.transform = transform
+        self.image_files, self.labels = self._get_all_image_paths_and_labels()
 
-    def get_all_data(self) -> np.array:
-        data = []
+    def _get_label_encodings(self):
+        dir_list = os.listdir(os.path.join(FaceDataset.GREYSCALE_DATA))
+        encoder = LabelEncoder()
+        encoder.fit(dir_list)
+        return encoder
+
+    def _get_all_image_paths_and_labels(self):
+        image_files = []
         labels = []
-        for _,dirs,_ in os.walk(DataProcess.GREYSCALE_DATA):
-            label_encode = self.label_encoding.fit_transform(dirs)
-            for idx,dir in enumerate(dirs): 
-                for _,_,files in os.walk(f'{DataProcess.GREYSCALE_DATA}/{dir}'):
-                    for file in files:
-                        image = cv2.imread(f'{DataProcess.GREYSCALE_DATA}/{dir}/{file}', cv2.IMREAD_GRAYSCALE)
-                        data.append(image)
-                        labels.append(label_encode[idx])
-        return np.asarray(data), np.asarray(labels)
+        dirs = os.listdir(FaceDataset.GREYSCALE_DATA)
+        for dir in dirs:
+            file_list = os.listdir(os.path.join(FaceDataset.GREYSCALE_DATA,dir))
+            for idx,f_string in enumerate(file_list):
+                file_list[idx] = os.path.join(FaceDataset.GREYSCALE_DATA,dir,f_string)
+            image_files.append(file_list)
+            labels.append(self.label_encoding.transform(np.array([dir]).repeat(len(file_list))))
+        # faltten
+        image_files = [item for sublist in image_files for item in sublist]
+        labels = [item for sublist in labels for item in sublist]
+        return image_files,Tensor(labels)
+
+    def _get_count(self):
+        count = 0
+        dirs = os.listdir(FaceDataset.GREYSCALE_DATA)
+        for dir in dirs:
+            count += len(os.listdir(os.path.join(FaceDataset.GREYSCALE_DATA,dir)))
+        return count
     
-    def split_data(self,X,y) -> list:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    def __len__(self):
+        return self.data_count
 
-        X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=12)
-
-        return X_train,X_val,X_test,y_train,y_val,y_test
-
-    def normalize(self,images: np.array) -> np.array:
-        norm_img = np.zeros(images.shape)
-        normalized_image = cv2.normalize(images,  norm_img, 0.0, 1.0, cv2.NORM_MINMAX,cv2.CV_32FC1)
-        return normalized_image
-        
+    def __getitem__(self, index):
+        file_path = self.image_files[index]
+        label = self.labels[index]
+        image = Image.open(file_path)
+        if self.transform:
+            image = self.transform(image)
+        return image,label
 
 if __name__ == '__main__':
-    process = DataProcess()
-    data,labels = process.get_all_data()
-    norm_data = process.normalize(data)
-    print(norm_data)
+    process = FaceDataset()
