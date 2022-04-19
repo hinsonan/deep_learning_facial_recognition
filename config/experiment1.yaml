@@ -1,0 +1,10 @@
+experiment_name: test1
+
+model:
+ train: True
+ save_path: models/basic.pt
+
+# hyper params
+batch_size: 32
+lr: 0.001
+epochs: 5
