@@ -1,4 +1,5 @@
 import os
+import re
 import numpy as np
 from PIL import Image
 from sklearn.preprocessing import LabelEncoder
@@ -55,5 +56,33 @@ class FaceDataset(Dataset):
             image = self.transform(image)
         return image,label
 
+class FaceDetectionDataset:
+    
+    def __init__(self,truth_label_path:str) -> None:
+        self.truth_label_path = truth_label_path
+        self.image_paths, self.bboxes = self.get_image_paths(1,100)
+        
+
+    def get_image_paths(self,number_of_faces_in_image,number_of_images_retrieved):
+        image_path = []
+        boxes = []
+        with open(self.truth_label_path,'r') as f:
+            lines = f.readlines()
+        for idx,line in enumerate(lines):
+            if re.match(f'^{number_of_faces_in_image}\n',line):
+                image_path.append(lines[idx-1].strip())
+                box = lines[idx+1].strip().split(' ')[0:4]
+                box = [int(x) for x in box]
+                boxes.append(box)
+                if len(image_path) >= number_of_images_retrieved:
+                    return image_path, boxes
+        return image_path, boxes
+
+    def stream_data(self):
+        for image_path, bbox in zip(self.image_paths,self.bboxes):
+            img = Image.open(os.path.join('data/WIDER_val/images',image_path))
+            yield img,bbox
+
 if __name__ == '__main__':
     process = FaceDataset()
+    process = FaceDetectionDataset('data/wider_face_split/wider_face_val_bbx_gt.txt')
