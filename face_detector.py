@@ -1,6 +1,5 @@
 import cv2
 from facenet_pytorch import MTCNN
-import numpy as np
 import torch
 
 class HaarCascadeFaceDetector:
@@ -13,14 +12,12 @@ class HaarCascadeFaceDetector:
 
         faces = self.model.detectMultiScale(gray_img,1.03,1,minSize=[50,50])
 
+        boxes = []
         # Draw rectangle around the faces
-        print(len(faces))
         for (x, y, w, h) in faces:
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-        # Display the output
-        cv2.imshow('img', img)
-        cv2.waitKey()
-
+            box = [int(x), int(y), int(x+w), int(y+h)]
+            boxes.append(box)
+        return boxes
 class MTCNNFaceDetector:
     def __init__(self) -> None:
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -29,14 +26,7 @@ class MTCNNFaceDetector:
     def detect(self,img):
         img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
         boxes, _ = self.model.detect(img)
-        for box in boxes:
-            # clip the bounding box dimensions to the image size
-            box = np.clip(box,0,img.shape[0]-2)
-            box = [int(x) for x in box]
-            print(box)
-            cv2.rectangle(img,(box[0],0),(box[2],box[3]),(255, 0, 0), 2)
-        cv2.imshow('img', img)
-        cv2.waitKey()
+        return boxes
 
 if __name__ == '__main__':
     # detector = HaarCascadeFaceDetector()

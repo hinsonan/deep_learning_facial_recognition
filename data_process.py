@@ -60,7 +60,8 @@ class FaceDetectionDataset:
     
     def __init__(self,truth_label_path:str) -> None:
         self.truth_label_path = truth_label_path
-        self.image_paths, self.bboxes = self.get_image_paths(1,100)
+        self.count = 500
+        self.image_paths, self.bboxes = self.get_image_paths(1,self.count)
         
 
     def get_image_paths(self,number_of_faces_in_image,number_of_images_retrieved):
@@ -70,10 +71,13 @@ class FaceDetectionDataset:
             lines = f.readlines()
         for idx,line in enumerate(lines):
             if re.match(f'^{number_of_faces_in_image}\n',line):
-                image_path.append(lines[idx-1].strip())
                 box = lines[idx+1].strip().split(' ')[0:4]
                 box = [int(x) for x in box]
+                # check if the bounding box is all 0s and dont use this image
+                if box[0] == 0 and box[1] == 0 and box[2] == 0 and box[3] == 0: 
+                    continue
                 boxes.append(box)
+                image_path.append(lines[idx-1].strip())
                 if len(image_path) >= number_of_images_retrieved:
                     return image_path, boxes
         return image_path, boxes

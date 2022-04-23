@@ -1,10 +1,11 @@
-experiment_name: test1
+experiment_name: vgg
 
 model:
  train: True
- save_path: models/basic.pt
+ eval: True
+ save_path: models/vgg.pt
 
 # hyper params
-batch_size: 32
+batch_size: 128
 lr: 0.001
-epochs: 5
+epochs: 20

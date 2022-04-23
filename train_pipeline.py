@@ -28,8 +28,12 @@ class TrainingPipeline():
         self.epochs = config['epochs']
         self.learning_rate = config['lr']
 
+        # load data
+        self.train_loader,self.val_loader,self.test_loader = self.load_data()
+
     def load_data(self):
         transform = transforms.Compose([
+            transforms.Resize(size=(128,128)),
             transforms.ToTensor(),
             # note that this may not be the most accurate way to normalize
             transforms.Normalize(mean=[0.5],std=[0.5])
@@ -49,13 +53,13 @@ class TrainingPipeline():
 
         return training_loader,validation_loader,testing_loader
 
-    def validate(self,val_loader,model,device,loss_fn):
+    def validate(self,model,device,loss_fn):
         # run through val set at the end of every epoch
         running_vloss = 0.0
         running_vaccuracy = 0.0
         running_vprecision = 0.0
         running_vrecall = 0.0
-        for i, val_data in enumerate(val_loader):
+        for i, val_data in enumerate(self.val_loader):
             vinputs, vlabels = val_data
             vinputs = vinputs.to(device=device)
             vlabels = vlabels.to(device=device).to(torch.int64)
@@ -80,8 +84,6 @@ class TrainingPipeline():
         return avg_vloss,avg_vacc,avg_vprec,avg_recall
 
     def train_model(self):
-        train_loader,val_loader,test_loader = self.load_data()
-
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(f'You are using: {device}')
 
@@ -95,7 +97,7 @@ class TrainingPipeline():
         for epoch in range(1,self.epochs+1):
             train_loss = 0.0
             running_train_loss = 0.0
-            for i,data in enumerate(train_loader):
+            for i,data in enumerate(self.train_loader):
                 inputs,labels = data
                 
                 inputs = inputs.to(device=device)
@@ -125,7 +127,7 @@ class TrainingPipeline():
                     running_train_loss = 0.0
 
             # end of epoch metrics
-            avg_vloss,avg_vacc,avg_vprec,avg_recall = self.validate(val_loader,model,device,loss_fn)
+            avg_vloss,avg_vacc,avg_vprec,avg_recall = self.validate(model,device,loss_fn)
             metrics['train_loss'].append(train_loss)
             metrics['train_acc'].append(train_acc)
             metrics['train_precision'].append(train_prec)
@@ -142,6 +144,9 @@ class TrainingPipeline():
         # training is done return the metrics
         self.plot_metrics(metrics)
 
+        # save the model
+        torch.save(model,self.model_path)
+
     def plot_metrics(self,metrics:dict):
         if not os.path.isdir(f'experiment_results/{self.experiment_name}'):
             os.mkdir(f'experiment_results/{self.experiment_name}')
@@ -155,13 +160,35 @@ class TrainingPipeline():
             json.dump(metrics,f,indent=4)
 
     def evaluate(self):
-        pass
+        model = torch.load(self.model_path,map_location='cpu')
+        model.eval()
+        running_test_acc = 0
+        running_test_prec = 0
+        running_test_recall = 0
+        for i,data in enumerate(self.test_loader):
+            inputs, labels = data
+            out = model(inputs)
+            out = np.argmax(out.detach().numpy(),axis=1)
+            acc = accuracy_score(labels, out)
+            prec = precision_score(labels, out,average='macro')
+            recall = recall_score(labels, out,average='macro')
+            running_test_acc += acc
+            running_test_prec += prec
+            running_test_recall += recall
+
+        avg_vacc = running_test_acc / (i+1)
+        avg_vprec = running_test_prec / (i+1)
+        avg_recall = running_test_recall / (i+1)
+        results =  {'Test Accuracy':avg_vacc,'Test Precision':avg_vprec,'Test Recall':avg_recall}
+
+        # write out metrics
+        with open(f'experiment_results/{self.experiment_name}/evaluation.json','w') as f:
+            json.dump(results,f,indent=4)
 
     def run_pipeline(self):
         if self.do_training:
             self.train_model()
         else:
-            # evaluate
             self.evaluate()
 
                     
