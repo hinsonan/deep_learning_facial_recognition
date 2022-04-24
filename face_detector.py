@@ -1,11 +1,12 @@
 import cv2
 from facenet_pytorch import MTCNN
 import torch
+import os
 
 class HaarCascadeFaceDetector:
 
     def __init__(self) -> None:
-        self.model: cv2.CascadeClassifier = cv2.CascadeClassifier('models/detector/haarcascade_frontalface_default.xml')
+        self.model: cv2.CascadeClassifier = cv2.CascadeClassifier(f'models{os.sep}detector{os.sep}haarcascade_frontalface_default.xml')
 
     def detect(self,img):
         gray_img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -31,5 +32,5 @@ class MTCNNFaceDetector:
 if __name__ == '__main__':
     # detector = HaarCascadeFaceDetector()
     detector = MTCNNFaceDetector()
-    img = cv2.imread('data/greyscale_faces/anger/372662640_e8dc799d8b_b_face.png')
+    img = cv2.imread(f'data{os.sep}greyscale_faces{os.sep}anger{os.sep}372662640_e8dc799d8b_b_face.png')
     detector.detect(img)

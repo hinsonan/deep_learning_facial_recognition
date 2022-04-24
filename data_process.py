@@ -84,9 +84,9 @@ class FaceDetectionDataset:
 
     def stream_data(self):
         for image_path, bbox in zip(self.image_paths,self.bboxes):
-            img = Image.open(os.path.join('data/WIDER_val/images',image_path))
+            img = Image.open(os.path.join(f'data{os.sep}WIDER_val{os.sep}images',image_path))
             yield img,bbox
 
 if __name__ == '__main__':
     process = FaceDataset()
-    process = FaceDetectionDataset('data/wider_face_split/wider_face_val_bbx_gt.txt')
+    process = FaceDetectionDataset(f'data{os.sep}wider_face_split{os.sep}wider_face_val_bbx_gt.txt')

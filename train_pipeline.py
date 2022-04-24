@@ -22,6 +22,7 @@ class TrainingPipeline():
         self.experiment_name = config['experiment_name']
         self.model_path = config['model']['save_path']
         self.do_training = config['model']['train']
+        self.do_eval = config['model']['eval']
 
         # read in hyper params
         self.batch_size = config['batch_size']
@@ -150,13 +151,13 @@ class TrainingPipeline():
     def plot_metrics(self,metrics:dict):
         if not os.path.isdir(f'experiment_results/{self.experiment_name}'):
             os.mkdir(f'experiment_results/{self.experiment_name}')
-        plot_learning_curve(metrics['train_loss'],metrics['val_loss'],'Loss',f'experiment_results/{self.experiment_name}/loss.png')
-        plot_learning_curve(metrics['train_acc'],metrics['val_acc'],'Accuracy',f'experiment_results/{self.experiment_name}/accuracy.png')
-        plot_learning_curve(metrics['train_precision'],metrics['val_precision'],'Precision',f'experiment_results/{self.experiment_name}/precision.png')
-        plot_learning_curve(metrics['train_recall'],metrics['val_recall'],'Recall',f'experiment_results/{self.experiment_name}/recall.png')
+        plot_learning_curve(metrics['train_loss'],metrics['val_loss'],'Loss',f'experiment_results{os.sep}{self.experiment_name}{os.sep}loss.png')
+        plot_learning_curve(metrics['train_acc'],metrics['val_acc'],'Accuracy',f'experiment_results{os.sep}{self.experiment_name}{os.sep}accuracy.png')
+        plot_learning_curve(metrics['train_precision'],metrics['val_precision'],'Precision',f'experiment_results{os.sep}{self.experiment_name}{os.sep}precision.png')
+        plot_learning_curve(metrics['train_recall'],metrics['val_recall'],'Recall',f'experiment_results{os.sep}{self.experiment_name}{os.sep}recall.png')
 
         # write out metrics
-        with open(f'experiment_results/{self.experiment_name}/metrics.json','w') as f:
+        with open(f'experiment_results{os.sep}{self.experiment_name}{os.sep}metrics.json','w') as f:
             json.dump(metrics,f,indent=4)
 
     def evaluate(self):
@@ -182,18 +183,22 @@ class TrainingPipeline():
         results =  {'Test Accuracy':avg_vacc,'Test Precision':avg_vprec,'Test Recall':avg_recall}
 
         # write out metrics
-        with open(f'experiment_results/{self.experiment_name}/evaluation.json','w') as f:
+        with open(f'experiment_results{os.sep}{self.experiment_name}{os.sep}evaluation.json','w') as f:
             json.dump(results,f,indent=4)
 
     def run_pipeline(self):
         if self.do_training:
+            print('Begin Training')
             self.train_model()
-        else:
+            print('Done')
+        if self.do_eval:
+            print('Begin Evaluation')
             self.evaluate()
+            print('Done')
 
                     
 
 if __name__ == '__main__':
-    pipeline = TrainingPipeline('config/experiment1.yaml')
+    pipeline = TrainingPipeline(f'config{os.sep}experiment1.yaml')
     pipeline.run_pipeline()
     
