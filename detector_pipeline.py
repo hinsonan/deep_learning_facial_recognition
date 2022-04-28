@@ -7,8 +7,9 @@ import os
 class DetectorPipeline:
     
     def __init__(self,backbone_model='MTCNN') -> None:
+        self.backbone_model = backbone_model
         self.dataset = FaceDetectionDataset(f'data{os.sep}wider_face_split{os.sep}wider_face_val_bbx_gt.txt')
-        if backbone_model == 'MTCNN':
+        if self.backbone_model == 'MTCNN':
             self.detector = MTCNNFaceDetector()
         else:
             self.detector = HaarCascadeFaceDetector()
@@ -76,7 +77,7 @@ class DetectorPipeline:
         metrics['Accuracy IoU at 75%'] = IoU_75.count(1) / len(IoU_75)
         metrics['Accuracy IoU at 85%'] = IoU_85.count(1) / len(IoU_85)
 
-        with open(f'experiment_results{os.sep}detection_metrics{os.sep}{type(self.detector)}.json','w') as f:
+        with open(f'experiment_results{os.sep}detection_metrics{os.sep}{self.backbone_model}.json','w') as f:
             json.dump(metrics,f,indent=4)
 
     def run_pipeline(self):
