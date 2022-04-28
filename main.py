@@ -2,7 +2,8 @@
 description:This file will tie the models together and generate an 
 output of an image with a bounding box and emotional label
 '''
-from PIL import Image, ImageDraw, ImageOps
+import os
+from PIL import Image, ImageDraw, ImageOps,ImageFont
 import numpy as np
 import torch
 from pathlib import Path
@@ -26,9 +27,7 @@ if __name__ == '__main__':
         box = [int(x) for x in box]
         img_draw = ImageDraw.Draw(img)
         img_draw.rectangle(box,outline='blue',width=5)
-    img.show()
     im1 = img.crop(box)
-    im1.show()
 
     # resize and greyscale image
     im1 = ImageOps.grayscale(im1)
@@ -42,5 +41,8 @@ if __name__ == '__main__':
     im1 = im1.unsqueeze(0)
     out = model(im1)
     label = np.argmax(out.detach().numpy())
-    print(label)
+    dic = {0:'anger',1:'contempt',2:'disgust',3:'fear',4:'happiness',5:'neutrality',6:'sadness',7:'surprise'}
+    string_label = dic[label]
+    img_draw.text((box[0],box[1]),string_label,(255,255,255),ImageFont.truetype(f'fonts{os.sep}US101.TTF',size=65))
+    img.show()
 
