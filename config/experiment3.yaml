@@ -1,0 +1,14 @@
+experiment_name: vgg_with_augment
+
+use_augmented_data: True
+
+model:
+ train: True
+ eval: True
+ save_path: models/vgg_with_augment.pt
+ model_type: vgg
+
+# hyper params
+batch_size: 128
+lr: 0.0001
+epochs: 10

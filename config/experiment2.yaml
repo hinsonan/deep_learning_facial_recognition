@@ -1,5 +1,7 @@
 experiment_name: resnet18
 
+use_augmented_data: False
+
 model:
  train: True
  eval: True

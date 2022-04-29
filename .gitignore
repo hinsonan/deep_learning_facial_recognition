@@ -2,6 +2,7 @@ data/greyscale_faces
 data/rgb_faces
 data/wider_face_split
 data/WIDER_val
+data/augmentation
   
 # Byte-compiled / optimized / DLL files
 __pycache__/

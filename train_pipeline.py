@@ -25,6 +25,9 @@ class TrainingPipeline():
         self.do_eval = config['model']['eval']
         self.model_type = config['model']['model_type']
 
+        # use the augmented data or not 
+        self.use_augmented_data = config['use_augmented_data']
+
         # read in hyper params
         self.batch_size = config['batch_size']
         self.epochs = config['epochs']
@@ -40,10 +43,10 @@ class TrainingPipeline():
             # note that this may not be the most accurate way to normalize
             transforms.Normalize(mean=[0.5],std=[0.5])
         ])
-        dataset = FaceDataset(transform)
+        dataset = FaceDataset(transform,self.use_augmented_data)
         train_size = int(len(dataset)*.6)
         val_size = int(len(dataset)*.2) + 1
-        test_size = int(len(dataset)*.2) + 1
+        test_size = int(len(dataset)*.2)
         train_set, val_set, test_set = random_split(dataset,[train_size,val_size,test_size],generator=torch.Generator().manual_seed(42))
 
         # now that we have our split data we need to create data loaders in order to use them
@@ -202,6 +205,6 @@ class TrainingPipeline():
                     
 
 if __name__ == '__main__':
-    pipeline = TrainingPipeline(f'config{os.sep}experiment1.yaml')
+    pipeline = TrainingPipeline(f'config{os.sep}experiment3.yaml')
     pipeline.run_pipeline()
     
