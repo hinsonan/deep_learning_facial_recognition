@@ -91,7 +91,7 @@ class TrainingPipeline():
 
         model = EmotionalModel(self.model_type).to(device=device)
 
-        optimizer = torch.optim.Adam(model.parameters(),lr=0.001)
+        optimizer = torch.optim.Adam(model.parameters(),lr=self.learning_rate)
 
         loss_fn = torch.nn.CrossEntropyLoss()
 
@@ -106,6 +106,8 @@ class TrainingPipeline():
                 labels = labels.to(device=device).to(torch.int64)
 
                 optimizer.zero_grad()
+
+                # optimizer.param_groups[0]["lr"] = 0.0001
                 
                 outputs = model(inputs)
 
@@ -200,6 +202,6 @@ class TrainingPipeline():
                     
 
 if __name__ == '__main__':
-    pipeline = TrainingPipeline(f'config{os.sep}experiment2.yaml')
+    pipeline = TrainingPipeline(f'config{os.sep}experiment1.yaml')
     pipeline.run_pipeline()
     
