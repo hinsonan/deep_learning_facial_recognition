@@ -23,6 +23,7 @@ class TrainingPipeline():
         self.model_path = config['model']['save_path']
         self.do_training = config['model']['train']
         self.do_eval = config['model']['eval']
+        self.model_type = config['model']['model_type']
 
         # read in hyper params
         self.batch_size = config['batch_size']
@@ -88,7 +89,7 @@ class TrainingPipeline():
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(f'You are using: {device}')
 
-        model = EmotionalModel().to(device=device)
+        model = EmotionalModel(self.model_type).to(device=device)
 
         optimizer = torch.optim.Adam(model.parameters(),lr=0.001)
 
@@ -199,6 +200,6 @@ class TrainingPipeline():
                     
 
 if __name__ == '__main__':
-    pipeline = TrainingPipeline(f'config{os.sep}experiment1.yaml')
+    pipeline = TrainingPipeline(f'config{os.sep}experiment2.yaml')
     pipeline.run_pipeline()
     

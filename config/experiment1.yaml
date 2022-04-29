@@ -4,6 +4,7 @@ model:
  train: True
  eval: True
  save_path: models/vgg.pt
+ model_type: vgg
 
 # hyper params
 batch_size: 128
