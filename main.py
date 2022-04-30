@@ -27,6 +27,7 @@ if __name__ == '__main__':
         box = [int(x) for x in box]
         img_draw = ImageDraw.Draw(img)
         img_draw.rectangle(box,outline='blue',width=5)
+    img_draw.rectangle([338, 26, 338+521, 26+720],outline='green',width=8)
     im1 = img.crop(box)
 
     # resize and greyscale image
@@ -43,6 +44,6 @@ if __name__ == '__main__':
     label = np.argmax(out.detach().numpy())
     dic = {0:'anger',1:'contempt',2:'disgust',3:'fear',4:'happiness',5:'neutrality',6:'sadness',7:'surprise'}
     string_label = dic[label]
-    img_draw.text((box[0],box[1]),string_label,(255,255,255),ImageFont.truetype(f'fonts{os.sep}US101.TTF',size=65))
+    # img_draw.text((box[0],box[1]),string_label,(255,255,255),ImageFont.truetype(f'fonts{os.sep}US101.TTF',size=65))
     img.show()
 

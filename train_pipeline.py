@@ -46,7 +46,7 @@ class TrainingPipeline():
         dataset = FaceDataset(transform,self.use_augmented_data)
         train_size = int(len(dataset)*.6)
         val_size = int(len(dataset)*.2) + 1
-        test_size = int(len(dataset)*.2)
+        test_size = int(len(dataset)*.2) + 1
         train_set, val_set, test_set = random_split(dataset,[train_size,val_size,test_size],generator=torch.Generator().manual_seed(42))
 
         # now that we have our split data we need to create data loaders in order to use them
@@ -205,6 +205,6 @@ class TrainingPipeline():
                     
 
 if __name__ == '__main__':
-    pipeline = TrainingPipeline(f'config{os.sep}experiment4.yaml')
+    pipeline = TrainingPipeline(f'config{os.sep}experiment5.yaml')
     pipeline.run_pipeline()
     
