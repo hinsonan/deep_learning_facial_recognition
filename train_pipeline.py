@@ -205,6 +205,6 @@ class TrainingPipeline():
                     
 
 if __name__ == '__main__':
-    pipeline = TrainingPipeline(f'config{os.sep}experiment3.yaml')
+    pipeline = TrainingPipeline(f'config{os.sep}experiment4.yaml')
     pipeline.run_pipeline()
     

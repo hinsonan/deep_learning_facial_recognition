@@ -1,0 +1,14 @@
+experiment_name: resnet18_with_augmentation
+
+use_augmented_data: True
+
+model:
+ train: True
+ eval: True
+ save_path: models/resnet18_with_augmentation.pt
+ model_type: resnet18
+
+# hyper params
+batch_size: 128
+lr: 0.001
+epochs: 25
