@@ -1,0 +1,14 @@
+experiment_name: resnet18_initial
+
+use_augmented_data: False
+
+model:
+ train: True
+ eval: True
+ save_path: models/resnet18_initial.pt
+ model_type: resnet18
+
+# hyper params
+batch_size: 64
+lr: 0.001
+epochs: 10
